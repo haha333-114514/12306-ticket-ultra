@@ -2,4 +2,4 @@
 一个能按照理想出发时间，历时，票价，余票情况推荐最优车次；能自主规划多段中转；能规划多个城市的铁路游路线
 
 # Run 
-Double click "启动12306助手.bat"
+Double click "启动12306助手.bat" or run "python work/ticket_server.py"
