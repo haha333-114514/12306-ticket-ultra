@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>出行备选与提醒</title>
+  <style>
+    :root { font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; color: #202b32; background: #f4f6f4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .top { background: #fff; border-bottom: 1px solid #dfe6e2; }
+    .top-inner { max-width: 1220px; margin: auto; padding: 18px 26px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .mark { width: 36px; height: 36px; border-radius: 7px; background: #087f69; color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 21px; }
+    h1 { font-size: 19px; margin: 0; letter-spacing: 0; }
+    .sub { color: #67747a; font-size: 12px; margin-top: 2px; }
+    .top a, .primary { background: #087f69; color: #fff; border: 1px solid #087f69; border-radius: 6px; padding: 10px 14px; text-decoration: none; font-weight: 650; white-space: nowrap; }
+    .top a:hover, .primary:hover { background: #066b59; }
+    main { max-width: 1220px; margin: 0 auto; padding: 25px 26px 50px; }
+    .heading { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 20px; }
+    .heading h2 { font-size: 27px; line-height: 1.25; margin: 0 0 5px; }
+    .heading p { color: #64747a; margin: 0; font-size: 14px; }
+    .pill { color: #246055; background: #e6f3ed; border: 1px solid #c9e7d8; padding: 7px 10px; border-radius: 5px; font-size: 12px; white-space: nowrap; }
+    .layout { display: grid; grid-template-columns: minmax(280px, 390px) minmax(0, 1fr); gap: 22px; align-items: start; }
+    .panel { background: #fff; border: 1px solid #dfe6e2; border-radius: 7px; }
+    .panel-head { padding: 17px 20px; border-bottom: 1px solid #e6ebe8; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .panel-head h3 { font-size: 16px; margin: 0; }
+    .panel-body { padding: 20px; }
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+    label, legend { display: block; font-size: 13px; font-weight: 650; margin-bottom: 7px; }
+    input[type=text], input[type=date], input[type=datetime-local], select { width: 100%; min-height: 40px; border: 1px solid #cbd7d0; border-radius: 5px; padding: 8px 10px; background: white; color: #202b32; }
+    input:focus, select:focus { outline: 2px solid #76c5ac; outline-offset: 1px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hint { color: #738087; font-size: 12px; margin: 6px 0 0; line-height: 1.5; }
+    fieldset { border: 0; padding: 0; margin: 0 0 16px; }
+    .checks { display: flex; flex-wrap: wrap; gap: 7px; }
+    .check { display: flex; align-items: center; gap: 6px; border: 1px solid #ccd9d3; border-radius: 5px; padding: 7px 9px; font-size: 13px; font-weight: 400; margin: 0; }
+    .check:has(input:checked) { background: #e9f5ef; border-color: #91c9ae; color: #085c4d; }
+    .check input { accent-color: #087f69; margin: 0; }
+    .actions { display: flex; gap: 8px; margin-top: 20px; }
+    .secondary { border: 1px solid #cbd7d0; border-radius: 6px; padding: 9px 12px; color: #345047; background: #fff; }
+    .secondary:hover { background: #f0f5f1; }
+    .status { min-height: 18px; margin-top: 10px; font-size: 12px; color: #087f69; }
+    .summary { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 17px 20px; border-bottom: 1px solid #e6ebe8; }
+    .summary strong { font-size: 17px; }
+    .summary small { color: #738087; }
+    .empty { color: #6c7a80; text-align: center; padding: 56px 20px; line-height: 1.6; }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { text-align: left; padding: 12px 13px; border-bottom: 1px solid #e9eeeb; white-space: nowrap; }
+    th { color: #637177; background: #f8faf9; font-size: 12px; font-weight: 600; }
+    tbody tr:hover { background: #f7faf8; }
+    .priority { font-weight: 650; color: #087f69; }
+    .muted { color: #758289; }
+    .notice { margin-top: 14px; padding: 13px 15px; border-left: 3px solid #d29b42; background: #fff9ed; color: #665334; font-size: 12px; line-height: 1.6; }
+    .reminders { margin-top: 22px; }
+    .reminder-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 10px; align-items: end; }
+    .reminder-form .field { margin: 0; }
+    .reminder-list { margin: 17px 0 0; padding: 0; list-style: none; }
+    .reminder-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid #e8eeea; font-size: 13px; }
+    .reminder-list li:first-child { border-top: 0; }
+    .reminder-meta { color: #738087; font-size: 12px; margin-top: 3px; }
+    .icon-button { width: 30px; height: 30px; flex: 0 0 30px; border: 1px solid #dae4de; border-radius: 5px; background: white; color: #64747a; font-size: 19px; line-height: 1; }
+    .icon-button:hover { color: #b23f3f; border-color: #e9b9b9; }
+    .toast { position: fixed; right: 18px; bottom: 18px; max-width: min(390px, calc(100vw - 36px)); background: #173a32; color: #fff; padding: 15px 17px; border-radius: 7px; box-shadow: 0 9px 30px #102c2340; z-index: 5; display: none; line-height: 1.5; }
+    .toast.show { display: block; }
+    @media (max-width: 800px) { .layout { grid-template-columns: 1fr; } .heading h2 { font-size: 23px; } }
+    @media (max-width: 560px) { main { padding: 20px 15px 40px; } .top-inner { padding: 13px 15px; } .top a { padding: 8px 9px; font-size: 12px; } .sub { display: none; } .heading { align-items: start; } .pill { display: none; } .reminder-form { grid-template-columns: 1fr; } .row { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="top"><div class="top-inner">
+    <div class="brand"><div class="mark" aria-hidden="true">行</div><div><h1>出行备选与提醒</h1><div class="sub">本地保存 · 手动完成官方购票</div></div></div>
+    <a href="https://www.12306.cn/index/" target="_blank" rel="noopener noreferrer">前往 12306 ↗</a>
+  </div></header>
+  <main>
+    <div class="heading"><div><h2>把可接受的行程先排好</h2><p>按优先顺序整理车次和候补选择，在关键时间提醒你手动操作。</p></div><span class="pill">数据仅保存在此浏览器</span></div>
+    <div class="layout">
+      <form id="trip-form" class="panel" novalidate>
+        <div class="panel-head"><h3>出行偏好</h3></div>
+        <div class="panel-body">
+          <div class="row"><div class="field"><label for="from">出发站</label><input id="from" type="text" maxlength="24" placeholder="例如：北京南" autocomplete="off" required></div><div class="field"><label for="to">到达站</label><input id="to" type="text" maxlength="24" placeholder="例如：上海虹桥" autocomplete="off" required></div></div>
+          <div class="field"><label for="date">首选日期</label><input id="date" type="date" required></div>
+          <fieldset><legend>可接受的相邻日期</legend><div class="checks"><label class="check"><input id="previous" type="checkbox"> 前一天</label><label class="check"><input id="next" type="checkbox"> 后一天</label></div></fieldset>
+          <div class="field"><label for="trains">车次优先顺序</label><input id="trains" type="text" maxlength="240" placeholder="例如：G101, G103, G105" autocomplete="off"><p class="hint">用逗号、空格或顿号分隔。留空表示不限车次。</p></div>
+          <fieldset><legend>可接受的席别</legend><div class="checks" id="seat-checks"><label class="check"><input type="checkbox" value="二等座" checked> 二等座</label><label class="check"><input type="checkbox" value="一等座"> 一等座</label><label class="check"><input type="checkbox" value="商务座"> 商务座</label><label class="check"><input type="checkbox" value="硬卧"> 硬卧</label><label class="check"><input type="checkbox" value="硬座"> 硬座</label><label class="check"><input type="checkbox" value="软卧"> 软卧</label></div></fieldset>
+          <div class="actions"><button class="primary" type="submit">生成备选清单</button><button class="secondary" type="button" id="clear-trip">清空</button></div>
+          <div class="status" id="form-status" role="status"></div>
+        </div>
+      </form>
+      <div>
+        <section class="panel"><div class="summary"><strong>候补与购票备选</strong><small id="plan-count">0 个组合</small></div><div id="plan-empty" class="empty">填写左侧偏好后，这里会列出可逐项尝试的方案。</div><div class="table-wrap" id="plan-table" hidden><table><thead><tr><th>顺序</th><th>日期</th><th>车次</th><th>席别</th><th>路线</th></tr></thead><tbody id="plan-body"></tbody></table></div></section>
+        <div class="notice">清单只是你的备选顺序，不代表实时余票。车次、席别、候补资格和支付时限均以 12306 页面显示为准。</div>
+        <section class="panel reminders"><div class="panel-head"><h3>时间提醒</h3><span class="muted" style="font-size:12px">页面打开时有效</span></div><div class="panel-body">
+          <form id="reminder-form" class="reminder-form"><div class="field"><label for="reminder-name">提醒事项</label><input id="reminder-name" type="text" maxlength="50" placeholder="例如：检查候补兑现" required></div><div class="field"><label for="reminder-time">提醒时间</label><input id="reminder-time" type="datetime-local" required></div><button class="primary" type="submit">添加提醒</button></form>
+          <p class="hint">保持此页面打开才能到点提醒；浏览器通知需授权。关闭页面后不会后台运行。</p>
+          <ul class="reminder-list" id="reminder-list"></ul>
+          <div class="status" id="reminder-status" role="status"></div>
+        </div></section>
+      </div>
+    </div>
+  </main>
+  <div id="toast" class="toast" role="alert"></div>
+  <script>
+    (() => {
+      'use strict';
+      const STORE = 'trip-helper-v1';
+      const $ = id => document.getElementById(id);
+      const form = $('trip-form');
+      const reminderForm = $('reminder-form');
+      const seatInputs = [...document.querySelectorAll('#seat-checks input')];
+      let state = { trip: null, reminders: [] };
+
+      function load() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(STORE));
+          if (saved && typeof saved === 'object') {
+            state.trip = saved.trip || null;
+            state.reminders = Array.isArray(saved.reminders) ? saved.reminders.filter(r => r && typeof r.time === 'string' && typeof r.name === 'string') : [];
+          }
+        } catch (_) { /* An invalid local save should not prevent use. */ }
+      }
+      function save() {
+        try { localStorage.setItem(STORE, JSON.stringify(state)); }
+        catch (_) { $('form-status').textContent = '浏览器未能保存数据；本次页面仍可使用。'; }
+      }
+      function addDays(dateString, amount) {
+        const date = new Date(dateString + 'T12:00:00');
+        date.setDate(date.getDate() + amount);
+        return [date.getFullYear(), String(date.getMonth() + 1).padStart(2, '0'), String(date.getDate()).padStart(2, '0')].join('-');
+      }
+      function readTrip() {
+        const from = $('from').value.trim();
+        const to = $('to').value.trim();
+        const date = $('date').value;
+        const seats = seatInputs.filter(input => input.checked).map(input => input.value);
+        const trains = [...new Set($('trains').value.toUpperCase().split(/[\s,，、;；]+/).map(x => x.trim()).filter(Boolean))];
+        if (!from || !to || !date) throw new Error('请填写出发站、到达站和首选日期。');
+        if (from === to) throw new Error('出发站与到达站不能相同。');
+        if (!seats.length) throw new Error('请至少选择一种席别。');
+        if (trains.some(train => !/^[A-Z]{1,2}\d{1,5}$/.test(train))) throw new Error('车次格式有误，请使用 G101 这样的格式。');
+        return { from, to, date, previous: $('previous').checked, next: $('next').checked, trains, seats };
+      }
+      function renderPlan() {
+        const trip = state.trip;
+        const body = $('plan-body');
+        body.replaceChildren();
+        if (!trip) { $('plan-count').textContent = '0 个组合'; $('plan-empty').hidden = false; $('plan-table').hidden = true; return; }
+        const dates = [trip.date];
+        if (trip.previous) dates.push(addDays(trip.date, -1));
+        if (trip.next) dates.push(addDays(trip.date, 1));
+        const trains = trip.trains.length ? trip.trains : ['不限'];
+        const combinations = [];
+        for (const date of dates) for (const train of trains) for (const seat of trip.seats) combinations.push({ date, train, seat });
+        $('plan-count').textContent = `${combinations.length} 个组合`;
+        $('plan-empty').hidden = true;
+        $('plan-table').hidden = false;
+        for (const [index, item] of combinations.entries()) {
+          const row = document.createElement('tr');
+          for (const value of [String(index + 1).padStart(2, '0'), item.date, item.train, item.seat, `${trip.from} → ${trip.to}`]) {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            if (row.cells.length === 0) cell.className = 'priority';
+            row.appendChild(cell);
+          }
+          body.appendChild(row);
+        }
+      }
+      function formatTime(value) {
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? value : date.toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+      }
+      function renderReminders() {
+        const list = $('reminder-list');
+        list.replaceChildren();
+        state.reminders.sort((a, b) => new Date(a.time) - new Date(b.time));
+        if (!state.reminders.length) {
+          const item = document.createElement('li'); item.className = 'muted'; item.textContent = '暂无提醒'; list.appendChild(item); return;
+        }
+        for (const reminder of state.reminders) {
+          const item = document.createElement('li');
+          const label = document.createElement('div');
+          const name = document.createElement('strong'); name.textContent = reminder.name;
+          const meta = document.createElement('div'); meta.className = 'reminder-meta'; meta.textContent = `${formatTime(reminder.time)} · ${reminder.fired ? '已提醒' : '待提醒'}`;
+          label.append(name, meta);
+          const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'icon-button'; remove.textContent = '×'; remove.title = '删除提醒'; remove.setAttribute('aria-label', `删除${reminder.name}提醒`);
+          remove.addEventListener('click', () => { state.reminders = state.reminders.filter(x => x.id !== reminder.id); save(); renderReminders(); });
+          item.append(label, remove); list.appendChild(item);
+        }
+      }
+      function showToast(message) {
+        const toast = $('toast'); toast.textContent = message; toast.classList.add('show');
+        clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove('show'), 12000);
+      }
+      function checkReminders() {
+        const now = Date.now();
+        const due = state.reminders.filter(r => !r.fired && new Date(r.time).getTime() <= now);
+        if (!due.length) return;
+        due.forEach(r => { r.fired = true; });
+        save(); renderReminders();
+        const message = `到时间了：${due.map(r => r.name).join('、')}`;
+        showToast(message);
+        if ('Notification' in window && Notification.permission === 'granted') {
+          try { new Notification('出行提醒', { body: message }); } catch (_) { /* In-page reminder remains visible. */ }
+        }
+      }
+      load();
+      if (state.trip) {
+        const t = state.trip;
+        $('from').value = t.from || ''; $('to').value = t.to || ''; $('date').value = t.date || '';
+        $('previous').checked = !!t.previous; $('next').checked = !!t.next;
+        $('trains').value = Array.isArray(t.trains) ? t.trains.join(', ') : '';
+        seatInputs.forEach(input => { input.checked = Array.isArray(t.seats) && t.seats.includes(input.value); });
+      }
+      renderPlan(); renderReminders(); checkReminders();
+      setInterval(checkReminders, 15000);
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        try { state.trip = readTrip(); save(); renderPlan(); $('form-status').textContent = '备选清单已更新并保存在本机。'; }
+        catch (error) { $('form-status').textContent = error.message; }
+      });
+      $('clear-trip').addEventListener('click', () => {
+        form.reset(); state.trip = null; save(); renderPlan(); $('form-status').textContent = '出行偏好已清空。';
+      });
+      reminderForm.addEventListener('submit', async event => {
+        event.preventDefault();
+        const name = $('reminder-name').value.trim();
+        const time = $('reminder-time').value;
+        if (!name || !time || new Date(time).getTime() <= Date.now()) { $('reminder-status').textContent = '请填写事项，并选择未来的提醒时间。'; return; }
+        state.reminders.push({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, name, time, fired: false });
+        save(); renderReminders(); reminderForm.reset(); $('reminder-status').textContent = '提醒已添加。请保持本页面打开。';
+        if ('Notification' in window && Notification.permission === 'default') {
+          try { await Notification.requestPermission(); } catch (_) { /* Browser may disallow file-origin notifications. */ }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

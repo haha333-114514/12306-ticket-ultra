@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#087f69">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/app-icon.svg" type="image/svg+xml">
+  <title>12306 余票查询</title>
+  <style>
+    :root { font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif; color: #203038; background: #f4f6f4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    header { background: #fff; border-bottom: 1px solid #dfe6e2; }
+    .top { max-width: 1180px; margin: auto; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .identity { display: flex; align-items: center; gap: 12px; }
+    .mark { background: #087f69; color: white; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 6px; font-size: 20px; font-weight: 750; }
+    h1 { margin: 0; font-size: 19px; }
+    .eyebrow { color: #667780; font-size: 12px; margin-top: 2px; }
+    a { color: #087f69; }
+    .official { text-decoration: none; font-size: 13px; font-weight: 650; white-space: nowrap; }
+    main { max-width: 1180px; margin: auto; padding: 26px 24px 48px; }
+    h2 { font-size: 26px; margin: 0 0 6px; }
+    .lede { color: #667780; margin: 0 0 24px; font-size: 14px; }
+    .panel { background: white; border: 1px solid #dce5df; border-radius: 7px; }
+    .search { padding: 19px 20px; display: grid; grid-template-columns: minmax(140px,1fr) minmax(140px,1fr) minmax(150px,1fr) auto; align-items: end; gap: 13px; }
+    label { display: block; font-size: 12px; color: #52646d; font-weight: 650; margin-bottom: 7px; }
+    input, select { width: 100%; height: 42px; padding: 8px 10px; color: #203038; background: #fff; border: 1px solid #cbd8d1; border-radius: 5px; }
+    input:focus, select:focus { outline: 2px solid #75c4a9; outline-offset: 1px; }
+    button { height: 42px; border: 1px solid #087f69; background: #087f69; color: #fff; border-radius: 5px; padding: 0 17px; font-weight: 650; white-space: nowrap; }
+    button:hover { background: #066b59; }
+    button:disabled { opacity: .65; cursor: wait; }
+    .toolbar { margin: 24px 0 11px; display: flex; justify-content: space-between; gap: 16px; align-items: end; }
+    .tools { display: flex; gap: 10px; align-items: end; }
+    .tools label { margin-bottom: 5px; }
+    .tools select { height: 35px; min-width: 145px; font-size: 13px; }
+    .toolbar h3 { margin: 0 0 3px; font-size: 18px; }
+    .meta { font-size: 12px; color: #687981; }
+    .stats { display: flex; gap: 7px; flex-wrap: wrap; }
+    .stat { background: #e6f3ed; border: 1px solid #c8e6d6; border-radius: 5px; padding: 7px 10px; color: #0d6855; font-size: 12px; }
+    .stat.wait { background: #f8f2e9; border-color: #e8dcc6; color: #8a6126; }
+    .table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    th, td { padding: 13px 16px; text-align: left; border-bottom: 1px solid #e9efeb; white-space: nowrap; }
+    th { background: #f8faf9; color: #65757d; font-size: 12px; font-weight: 650; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #f7faf8; }
+    .train { font-weight: 750; color: #126b5a; }
+    .badge { display: inline-block; border-radius: 4px; padding: 4px 7px; font-size: 12px; background: #e7f3ea; color: #176343; font-weight: 650; }
+    .badge.wait { background: #f8f0df; color: #8c6121; }
+    .badge.none { background: #f0f2f2; color: #69787c; }
+    .badge.soon { background: #e8eef6; color: #365b83; }
+    .seat-detail { color: #73828a; margin-top: 4px; font-size: 11px; }
+    .choose { height: 32px; background: #fff; color: #087f69; padding: 0 10px; font-size: 12px; }
+    .choose:hover { color: #fff; }
+    .choose:disabled { color: #81908e; border-color: #d5dfd9; background: #f5f7f6; cursor: not-allowed; }
+    .empty { padding: 65px 16px; text-align: center; color: #697a80; line-height: 1.6; }
+    .message { margin-top: 13px; min-height: 22px; color: #9b532f; font-size: 13px; line-height: 1.5; }
+    .checkout-actions { margin-top: 10px; display: flex; align-items: center; gap: 10px; }
+    .checkout-actions[hidden] { display: none; }
+    .checkout-actions button { height: 36px; font-size: 13px; }
+    .checkout-actions span { color: #697981; font-size: 12px; }
+    .foot { margin-top: 18px; font-size: 12px; line-height: 1.7; color: #697981; }
+    .section-divider { border: 0; border-top: 1px solid #dce5df; margin: 38px 0 30px; }
+    .weight { width: 160px; }
+    .weight input { height: 35px; padding: 0; accent-color: #087f69; }
+    .ideal-time { width: 120px; }
+    .ideal-time input { height: 35px; }
+    .recommend { margin: 0 0 14px; padding: 14px 16px; border-left: 4px solid #087f69; background: #eaf5ee; color: #23443a; font-size: 13px; line-height: 1.6; }
+    .recommend strong { color: #075b4b; }
+    .score { font-weight: 750; color: #087f69; font-variant-numeric: tabular-nums; }
+    .score-note { margin-top: 4px; color: #73828a; font-size: 11px; }
+    .planner-search { grid-template-columns: minmax(140px,1fr) minmax(220px,1.5fr) minmax(135px,1fr) 110px 105px auto; }
+    .plan-times { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 12px; margin-top: 12px; }
+    .plan-times input { height: 38px; }
+    .planner-output { margin-top: 18px; }
+    .planner-head { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 12px; }
+    .planner-head h3 { margin: 0 0 4px; font-size: 18px; }
+    .planner-head p { margin: 0; color: #667780; font-size: 13px; }
+    .route { display: grid; gap: 0; }
+    .leg { display: grid; grid-template-columns: 64px minmax(160px,1fr) minmax(160px,1.3fr) auto; gap: 14px; align-items: center; padding: 16px 18px; border-bottom: 1px solid #e5ebe7; background: #fff; }
+    .leg:first-child { border-top: 1px solid #e5ebe7; }
+    .leg-day { color: #667780; font-size: 12px; font-weight: 700; }
+    .leg-stations { font-weight: 700; }
+    .leg-note { color: #5c6e74; font-size: 12px; line-height: 1.5; }
+    .leg a { white-space: nowrap; font-size: 12px; font-weight: 700; }
+    .planner-caveat { font-size: 12px; line-height: 1.6; color: #697981; margin-top: 12px; }
+    .path-search { grid-template-columns: minmax(220px,2fr) minmax(180px,1fr) 120px minmax(125px,1fr) auto; }
+    .path-result { margin-top: 18px; }
+    .path-summary { font-size: 14px; font-weight: 700; margin: 0 0 12px; }
+    .path-choice { max-width: 420px; margin-bottom: 12px; }
+    .path-score-note { color: #607078; font-size: 12px; margin: -5px 0 12px; }
+    .path-legs { display: grid; gap: 1px; background: #dce5df; border: 1px solid #dce5df; }
+    .path-leg { background: #fff; display: grid; grid-template-columns: 90px 1fr auto; gap: 12px; padding: 13px 16px; font-size: 13px; align-items: center; }
+    .path-leg strong { color: #126b5a; }
+    @media (max-width: 750px) { .search { grid-template-columns: 1fr 1fr; } .search button { grid-column: 1 / -1; } .toolbar { align-items: start; flex-direction: column; } }
+    @media (max-width: 750px) { .planner-search { grid-template-columns: 1fr 1fr; } .leg { grid-template-columns: 52px 1fr auto; } .leg-note { grid-column: 2 / -1; } }
+    @media (max-width: 750px) { .path-search { grid-template-columns: 1fr 1fr; } .path-search button { grid-column: 1 / -1; } }
+    @media (max-width: 750px) { .path-leg { grid-template-columns: 1fr; gap: 4px; } }
+    @media (max-width: 600px) { .tools { width: 100%; flex-wrap: wrap; } .tools > div { flex: 1; min-width: 140px; } .tools select { min-width: 0; } .weight { width: 100%; } }
+    @media (max-width: 460px) { main { padding: 22px 14px 40px; } .top { padding: 14px; } .eyebrow { display: none; } .search, .planner-search { padding: 15px; grid-template-columns: 1fr; } .search button { grid-column: auto; } h2 { font-size: 22px; } .leg { grid-template-columns: 45px 1fr; gap: 7px 10px; } .leg a { grid-column: 2; } .leg-note { grid-column: 2; } .ideal-time { width: 100%; } }
+  </style>
+</head>
+<body>
+  <header><div class="top"><div class="identity"><div class="mark" aria-hidden="true">行</div><div><h1>12306 余票查询</h1><div class="eyebrow">按需读取官方查询页面</div></div></div><div class="identity"><button class="choose" id="install-app" type="button" hidden title="安装到此设备">安装应用</button><a class="official" id="official-top" href="https://www.12306.cn/index/" target="_blank" rel="noopener noreferrer">打开 12306 ↗</a></div></div></header>
+  <main>
+    <h2>查询车次余票</h2>
+    <p class="lede">一等座与二等座</p>
+    <form class="panel search" id="search-form">
+      <div><label for="from">出发地（站 / 城市）</label><input id="from" required maxlength="30" value="上海虹桥" autocomplete="off"></div>
+      <div><label for="to">到达地（站 / 城市）</label><input id="to" required maxlength="30" value="南昌西" autocomplete="off"></div>
+      <div><label for="date">出发日期</label><input id="date" type="date" required value="2026-09-30"></div>
+      <button id="search-button" type="submit">查询余票</button>
+    </form>
+    <div class="toolbar"><div><h3>查询结果</h3><div class="meta" id="meta">尚未查询</div></div><div class="tools"><div><label for="sort">排序</label><select id="sort"><option value="recommended">最优推荐</option><option value="available">可购优先</option><option value="depart-asc">出发由早到晚</option><option value="depart-desc">出发由晚到早</option><option value="arrive-asc">到达由早到晚</option><option value="arrive-desc">到达由晚到早</option><option value="duration-asc">运行时长由短到长</option><option value="duration-desc">运行时长由长到短</option></select></div><div><label for="target-seat">目标席别</label><select id="target-seat"><option value="second">二等座</option><option value="first">一等座</option></select></div><div class="ideal-time"><label for="ideal-depart">理想发车</label><input id="ideal-depart" type="time" value="09:00" required></div><div class="weight" style="display: flex; gap: 10px; width: auto;">
+  <label>发车% <input id="w-depart" type="number" min="0" max="100" value="50" style="width: 55px; height: 35px;"></label>
+  <label>历时% <input id="w-duration" type="number" min="0" max="100" value="35" style="width: 55px; height: 35px;"></label>
+  <label>票价% <input id="w-price" type="number" min="0" max="100" value="15" style="width: 55px; height: 35px;"></label>
+</div></div></div>
+    <div class="stats" id="stats"></div>
+    <div id="recommend" class="recommend" hidden></div>
+    <section class="panel"><div id="empty" class="empty">点击“查询余票”查看车次。</div><div class="table-wrap" id="table-wrap" hidden><table><thead><tr><th>车次</th><th>出发</th><th>到达</th><th>历时</th><th>一等座</th><th>二等座</th><th>综合分</th><th></th></tr></thead><tbody id="results"></tbody></table></div></section>
+    <div class="message" id="message" role="status"></div>
+    <div class="checkout-actions" id="checkout-actions" hidden><button id="advance-checkout" type="button">已登录并选好乘车人，继续到付款页</button><span>不会点击支付</span></div>
+    <div class="foot">可输入完整站名或地级市名称；城市查询会保留该城市范围内的 G/D/C 车次。评分由理想发车时间、历时、票价三项归一化为 100 分。发车时间按钟形曲线计分，偏离理想时间 90 分钟时该项约保留 61%；历时与票价在本次查询的同席别车次中归一化。站点组合的可替代车次单独显示为容错指标，不影响评分。无票价或不可购车次不参与最优推荐。余票与票价以 12306 为准。</div>
+    <hr class="section-divider">
+    <h2>全国城市铁路路径</h2>
+    <p class="lede">按顺序输入城市，比较发车时间、历时和换乘次数。</p>
+    <form class="panel search path-search" id="path-form">
+      <div><label for="path-stations">途经城市</label><input id="path-stations" value="上海，青岛，威海" placeholder="上海，青岛，威海" maxlength="180" required></div>
+      <div><label for="path-start">最早出发时间</label><input id="path-start" type="datetime-local" required></div>
+      <div><label for="path-ideal">理想发车</label><input id="path-ideal" type="time" value="09:00" required></div>
+      <div><label for="path-mode">列车类型</label><select id="path-mode"><option value="all">高铁 + 普速</option><option value="high">仅高铁 / 动车</option><option value="regular">仅普通列车</option></select></div>
+      <button type="submit" id="path-button">推荐路线</button>
+    </form>
+    <div class="message" id="path-message" role="status"></div>
+    <div class="path-result" id="path-result" hidden><div class="path-choice"><label for="path-options">候选方案</label><select id="path-options"></select></div><p class="path-summary" id="path-summary"></p><p class="path-score-note" id="path-score-note"></p><div class="path-legs" id="path-legs"></div></div>
+    <div class="planner-caveat">指定的起点、终点和途经城市优先使用市区主站；主站无解时扩大到全市车站，额外换乘城市不受此限制。理想发车按 90 分钟尺度的钟形曲线计分，发车与历时分别占 50/85、35/85；每次换乘扣 5 分，超过城市数减一的部分再扣 35 分。使用 <a href="https://github.com/wensimehrp/chinese-railway-gtfs" target="_blank" rel="noopener noreferrer">第三方全国 GTFS 时刻表</a>；每天首次搜索检查一次新版本。<span id="path-version">当前内置版本：2026-09-20。</span>同站换乘至少 20 分钟；同城不同站至少 60 分钟，距离较远时按坐标增加缓冲。跨站交通时间只是估算，请核对实际交通。仅规划列车时刻，不代表所选日期实际开行，也不包含余票或票价。预订前请逐段在 12306 核实。</div>
+    <hr class="section-divider">
+    <h2>多城市往返铁路路线</h2>
+    <p class="lede">输入 1 至 4 个目的城市，最后一段返回出发城市。</p>
+    <form class="panel search planner-search" id="planner-form">
+      <div><label for="plan-origin">出发城市</label><input id="plan-origin" maxlength="30" value="上海" required></div>
+      <div><label for="plan-cities">目的城市</label><input id="plan-cities" maxlength="120" value="杭州，宁波" placeholder="用逗号分隔，如杭州，宁波" required></div>
+      <div><label for="plan-date">出发日期</label><input id="plan-date" type="date" required></div>
+      <div><label for="plan-stay">每城停留天数</label><input id="plan-stay" type="number" min="1" max="3" value="1" required></div>
+      <div><label for="plan-seat">席别</label><select id="plan-seat"><option value="second">二等座</option><option value="first">一等座</option></select></div>
+      <button type="submit">规划路线</button>
+    </form>
+    <div class="plan-times" id="plan-times"></div>
+    <div class="message" id="planner-message" role="status"></div>
+    <div class="planner-output" id="planner-output" hidden>
+      <div class="planner-head"><div><h3 id="planner-title"></h3><p id="planner-subtitle"></p></div></div>
+      <div class="route" id="route"></div>
+      <div class="planner-caveat">车次、余票和票价为查询时快照，预订前请在 12306 复核。每段为直达 G/D/C 车次；不含站外交通。</div>
+    </div>
+  </main>
+  <script>
+    (() => {
+      const $ = id => document.getElementById(id);
+      const form = $('search-form');
+      const button = $('search-button');
+      const official = $('official-top');
+      let current = null;
+      let checkoutToken = null;
+      let installPrompt = null;
+      window.addEventListener('beforeinstallprompt', event => {
+        event.preventDefault(); installPrompt = event; $('install-app').hidden = false;
+      });
+      $('install-app').addEventListener('click', async () => {
+        if (!installPrompt) return;
+        installPrompt.prompt(); await installPrompt.userChoice;
+        installPrompt = null; $('install-app').hidden = true;
+      });
+      if ('serviceWorker' in navigator && location.protocol === 'http:' && location.hostname === '127.0.0.1') {
+        navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+      }
+      const rank = value => value === '有' || /^\d+$/.test(value) && Number(value) > 0 ? 0 : value === '候补' ? 1 : value === '未开售' ? 2 : 3;
+      const badge = value => rank(value) === 0 ? 'badge' : rank(value) === 1 ? 'badge wait' : rank(value) === 2 ? 'badge soon' : 'badge none';
+      const minutes = value => { const [hours, mins] = value.split(':').map(Number); return hours * 60 + mins; };
+      const price = value => { const number = Number(value); return value !== '' && Number.isFinite(number) ? number : NaN; };
+      const validTime = value => /^\d{2}:\d{2}$/.test(value) && Number(value.slice(0, 2)) < 24 && Number(value.slice(3)) < 60;
+      const validDuration = value => /^\d{1,2}:\d{2}$/.test(value) && Number.isFinite(minutes(value));
+      const weights = () => { 
+        const depart = Number($('w-depart').value) || 0;
+        const duration = Number($('w-duration').value) || 0;
+        const price = Number($('w-price').value) || 0;
+        const total = depart + duration + price || 1; 
+        return { departure: depart / total, duration: duration / total, price: price / total }; 
+      };
+      function scoredRows(rows) {
+        const seat = $('target-seat').value;
+        const pairCounts = new Map();
+        rows.filter(row => rank(row.seats[seat].status) === 0).forEach(row => {
+          const key = `${row.from}→${row.to}`;
+          pairCounts.set(key, (pairCounts.get(key) || 0) + 1);
+        });
+        const candidates = rows.filter(row => validTime(row.depart) && validDuration(row.duration) && Number.isFinite(price(row.seats[seat].price)));
+        if (!candidates.length) return rows.map(row => ({ ...row, score: null, pairCount: pairCounts.get(`${row.from}→${row.to}`) || 0 }));
+        const durations = candidates.map(row => minutes(row.duration));
+        const prices = candidates.map(row => price(row.seats[seat].price));
+        const minDuration = Math.min(...durations), maxDuration = Math.max(...durations);
+        const minPrice = Math.min(...prices), maxPrice = Math.max(...prices);
+        const ideal = validTime($('ideal-depart').value) ? minutes($('ideal-depart').value) : minutes('09:00');
+        const weight = weights();
+        return rows.map(row => {
+          const cost = price(row.seats[seat].price);
+          const pairCount = pairCounts.get(`${row.from}→${row.to}`) || 0;
+          if (!validTime(row.depart) || !validDuration(row.duration) || !Number.isFinite(cost)) return { ...row, score: null, pairCount };
+          const delta = minutes(row.depart) - ideal;
+          const timePart = Math.exp(-.5 * (delta / 90) ** 2);
+          const durationPart = maxDuration === minDuration ? 1 : (maxDuration - minutes(row.duration)) / (maxDuration - minDuration);
+          const pricePart = maxPrice === minPrice ? 1 : (maxPrice - cost) / (maxPrice - minPrice);
+          const score = Math.round(100 * (weight.departure * timePart + weight.duration * durationPart + weight.price * pricePart));
+          return { ...row, timeDelta: delta, score, pairCount };
+        });
+      }
+      function compare(a, b) {
+        const mode = $('sort').value, seat = $('target-seat').value;
+        let result = 0;
+        if (mode === 'recommended') result = rank(a.seats[seat].status) - rank(b.seats[seat].status) || (b.score ?? -1) - (a.score ?? -1);
+        if (mode === 'available') result = rank(a.seats[seat].status) - rank(b.seats[seat].status);
+        if (mode === 'depart-asc') result = minutes(a.depart) - minutes(b.depart);
+        if (mode === 'depart-desc') result = minutes(b.depart) - minutes(a.depart);
+        if (mode === 'arrive-asc') result = (minutes(a.depart) + minutes(a.duration)) - (minutes(b.depart) + minutes(b.duration));
+        if (mode === 'arrive-desc') result = (minutes(b.depart) + minutes(b.duration)) - (minutes(a.depart) + minutes(a.duration));
+        if (mode === 'duration-asc') result = minutes(a.duration) - minutes(b.duration);
+        if (mode === 'duration-desc') result = minutes(b.duration) - minutes(a.duration);
+        return result || a.depart.localeCompare(b.depart) || a.train.localeCompare(b.train);
+      }
+
+      function clear() { $('results').replaceChildren(); $('stats').replaceChildren(); $('recommend').hidden = true; $('table-wrap').hidden = true; $('empty').hidden = false; }
+      function cell(row, value, className) { const td = document.createElement('td'); td.textContent = value; if (className) td.className = className; row.appendChild(td); return td; }
+      function seatCell(row, seat) {
+        const td = document.createElement('td');
+        const status = document.createElement('span'); status.className = badge(seat.status); status.textContent = seat.status || '未显示'; td.appendChild(status);
+        const detail = document.createElement('div'); detail.className = 'seat-detail'; detail.textContent = seat.status === '未开售' ? seat.saleAt ? `${seat.saleAt} 起售${seat.price ? ` · ¥${seat.price}` : ''}` : '请在12306核对起售时间' : seat.price ? `¥${seat.price}` : '';
+        td.appendChild(detail); row.appendChild(td);
+      }
+      function render(data) {
+        const rows = scoredRows(data.rows).sort(compare);
+        clear();
+        const scope = data.fromMode === 'city' || data.toMode === 'city' ? ` · 城市范围 ${data.fromStations.join('、')} → ${data.toStations.join('、')}` : '';
+        $('meta').textContent = `${data.from} → ${data.to} · ${data.date}${scope} · 查询于 ${new Date(data.queriedAt).toLocaleTimeString('zh-CN')}`;
+        const firstAvailable = rows.filter(row => rank(row.seats.first.status) === 0).length;
+        const secondAvailable = rows.filter(row => rank(row.seats.second.status) === 0).length;
+        const unopened = rows.filter(row => row.seats.first.status === '未开售' || row.seats.second.status === '未开售').length;
+        for (const [text, style] of [[`一等可购 ${firstAvailable}`, 'stat'], [`二等可购 ${secondAvailable}`, 'stat'], [`未开售 ${unopened}`, 'stat wait'], [`共 ${rows.length} 趟`, 'stat']]) {
+          const item = document.createElement('span'); item.className = style; item.textContent = text; $('stats').appendChild(item);
+        }
+        if (!rows.length) { $('empty').textContent = '没有查询到符合出发地、到达地范围的高铁车次。'; return; }
+        const best = rows.filter(row => rank(row.seats[$('target-seat').value].status) === 0 && row.score !== null).sort((a, b) => b.score - a.score)[0];
+        if (best) {
+          const seat = best.seats[$('target-seat').value];
+          $('recommend').replaceChildren();
+          const heading = document.createElement('strong'); heading.textContent = `推荐 ${best.train} · ${best.score} 分`; $('recommend').appendChild(heading);
+          const offset = Math.abs(best.timeDelta);
+          const timing = offset === 0 ? '正好是理想发车时间' : `比理想时间${best.timeDelta < 0 ? '早' : '晚'} ${offset} 分钟`;
+          $('recommend').append(`　${best.depart} → ${best.arrive} · ${timing} · 历时 ${best.duration} · ${$('target-seat').selectedOptions[0].textContent} ¥${seat.price}。实时余票可能变化。`);
+          $('recommend').hidden = false;
+        }
+        $('empty').hidden = true; $('table-wrap').hidden = false;
+        for (const item of rows) {
+          const tr = document.createElement('tr');
+          cell(tr, item.train, 'train'); cell(tr, `${item.from} ${item.depart}`); cell(tr, `${item.to} ${item.arrive}`); cell(tr, item.duration);
+          seatCell(tr, item.seats.first); seatCell(tr, item.seats.second);
+          const scoreCell = cell(tr, item.score === null ? '—' : String(item.score), 'score');
+          if (item.score !== null) {
+            const detail = document.createElement('div'); detail.className = 'score-note'; detail.textContent = `容错：同站组合另有 ${Math.max(0, item.pairCount - (rank(item.seats[$('target-seat').value].status) === 0 ? 1 : 0))} 趟可购`; scoreCell.appendChild(detail);
+          }
+          const weight = weights();
+          scoreCell.title = item.score === null ? '该席别暂无可比较的票价' : `发车 ${(weight.departure * 100).toFixed(0)}% · 历时 ${(weight.duration * 100).toFixed(1)}% · 票价 ${(weight.price * 100).toFixed(1)}%；容错不参与评分。`;
+          const action = document.createElement('td'); const choose = document.createElement('button'); choose.type = 'button'; choose.className = 'choose'; choose.textContent = '预订车次';
+          const selectedStatus = item.seats[$('target-seat').value].status;
+          choose.disabled = rank(selectedStatus) > 1;
+          choose.title = choose.disabled ? '所选席别当前不可选择' : `在 12306 选择 ${item.train}`;
+          choose.addEventListener('click', () => selectTrain(item, choose)); action.appendChild(choose); tr.appendChild(action);
+          $('results').appendChild(tr);
+        }
+      }
+      async function selectTrain(item, choose) {
+        choose.disabled = true; choose.textContent = '正在打开…'; $('message').textContent = ''; $('checkout-actions').hidden = true; checkoutToken = null;
+        try {
+          const response = await fetch('/api/select', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ from: item.from, to: item.to, date: current.date, train: item.train, seat: $('target-seat').value }) });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || '选择失败');
+          $('message').textContent = data.message;
+          if (data.state === 'awaiting_checkout' && data.checkoutToken) { checkoutToken = data.checkoutToken; $('checkout-actions').hidden = false; }
+        } catch (error) { $('message').textContent = error.message; }
+        finally { choose.textContent = '预订车次'; choose.disabled = rank(item.seats[$('target-seat').value].status) > 1; }
+      }
+      $('advance-checkout').addEventListener('click', async () => {
+        if (!checkoutToken) return;
+        const advance = $('advance-checkout'); advance.disabled = true; advance.textContent = '正在进入付款页…'; $('message').textContent = '';
+        try {
+          const response = await fetch('/api/advance', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ checkoutToken }) });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || '无法继续预订');
+          $('message').textContent = data.message;
+          $('checkout-actions').hidden = true; checkoutToken = null;
+        } catch (error) { $('message').textContent = error.message; advance.disabled = false; advance.textContent = '已登录并选好乘车人，继续到付款页'; }
+      });
+      $('sort').addEventListener('change', () => { if (current) render(current); });
+      $('target-seat').addEventListener('change', () => { if (current) render(current); });
+      ['w-depart', 'w-duration', 'w-price'].forEach(id => {
+        $(id).addEventListener('input', () => { if (current) render(current); });
+      });
+      $('ideal-depart').addEventListener('input', () => { if (current) render(current); });
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        button.disabled = true; button.textContent = '正在查询…'; $('message').textContent = '';
+        const from = $('from').value.trim(), to = $('to').value.trim(), date = $('date').value;
+        try {
+          const response = await fetch('/api/search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ from, to, date }) });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || '查询失败');
+          official.href = data.url; current = data; render(data);
+        } catch (error) {
+          $('message').textContent = `${error.message} 可在 12306 官方页面直接核对。`;
+          $('meta').textContent = '本次查询未完成'; current = null; clear();
+        } finally { button.disabled = false; button.textContent = '查询余票'; }
+      });
+
+      const isoDay = day => { const year = day.getFullYear(); const month = String(day.getMonth() + 1).padStart(2, '0'); const date = String(day.getDate()).padStart(2, '0'); return `${year}-${month}-${date}`; };
+      function syncPlanTimes() {
+        const count = Math.min(4, Math.max(1, $('plan-cities').value.split(/[，,、;；\n]+/).filter(value => value.trim()).length));
+        const previous = [...$('plan-times').querySelectorAll('input')].map(input => input.value);
+        const returnTime = previous.at(-1) || '16:00';
+        $('plan-times').replaceChildren();
+        for (let index = 0; index <= count; index++) {
+          const field = document.createElement('div');
+          const label = document.createElement('label'); label.htmlFor = `plan-time-${index}`;
+          label.textContent = index === count ? '返程理想发车' : `第 ${index + 1} 段理想发车`;
+          const input = document.createElement('input'); input.id = label.htmlFor; input.type = 'time'; input.required = true;
+          input.value = index === count ? returnTime : previous[index] && index < previous.length - 1 ? previous[index] : '09:00';
+          field.append(label, input); $('plan-times').appendChild(field);
+        }
+      }
+      $('plan-cities').addEventListener('input', syncPlanTimes);
+      syncPlanTimes();
+      async function planTrip(event) {
+        event.preventDefault();
+        $('planner-message').textContent = '';
+        $('planner-output').hidden = true;
+        const planButton = $('planner-form').querySelector('button[type="submit"]');
+        const origin = $('plan-origin').value.trim();
+        const cities = $('plan-cities').value.split(/[，,、;；\n]+/).map(value => value.trim()).filter(Boolean);
+        const stayDays = Number($('plan-stay').value);
+        const preferredTimes = [...$('plan-times').querySelectorAll('input')].map(input => input.value);
+        const start = $('plan-date').value;
+        if (start && start < isoDay(new Date())) { $('planner-message').textContent = '出发日期不能早于今天。'; return; }
+        if (!origin || !start || cities.length < 1 || cities.length > 4 || preferredTimes.length !== cities.length + 1 || preferredTimes.some(value => !validTime(value)) || !Number.isInteger(stayDays) || stayDays < 1 || stayDays > 3) {
+          $('planner-message').textContent = '请填写出发城市、1 至 4 个目的城市、日期和每城停留 1 至 3 天。'; return;
+        }
+        if (new Set([origin, ...cities]).size !== cities.length + 1) { $('planner-message').textContent = '城市不能重复。'; return; }
+        const lastDate = new Date(`${start}T12:00:00`); lastDate.setDate(lastDate.getDate() + cities.length * stayDays);
+        const saleLimit = new Date(); saleLimit.setDate(saleLimit.getDate() + 14);
+        if (isoDay(lastDate) > isoDay(saleLimit)) { $('planner-message').textContent = '后段超出 12306 当前预售范围，请缩短停留天数或临近出行再规划。'; return; }
+        const route = $('route'); route.replaceChildren();
+        planButton.disabled = true; planButton.textContent = '寻找路线中…';
+        $('planner-message').textContent = `正在用 12306 可购车次串联 ${cities.length} 个城市。`;
+        let plan;
+        try {
+          const response = await fetch('/api/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ origin, cities, date: start, stayDays, seat: $('plan-seat').value, preferredTimes }) });
+          plan = await response.json();
+          if (!response.ok) throw new Error(plan.error || '无法规划路线');
+        } catch (error) {
+          $('planner-message').textContent = error.message;
+          planButton.disabled = false; planButton.textContent = '规划路线'; return;
+        }
+        planButton.disabled = false; planButton.textContent = '规划路线';
+        if (!plan.complete) { $('planner-message').textContent = `${plan.reason} 已核查 ${plan.checkedPairs} 组城市/日期。`; return; }
+        for (const [index, item] of plan.legs.entries()) {
+          const leg = document.createElement('div'); leg.className = 'leg';
+          const dayLabel = document.createElement('div'); dayLabel.className = 'leg-day'; dayLabel.textContent = `第 ${index * stayDays + 1} 天`;
+          const stations = document.createElement('div'); stations.className = 'leg-stations';
+          stations.textContent = `${item.train.from} → ${item.train.to}`;
+          const detail = document.createElement('div'); detail.className = 'leg-note';
+          detail.textContent = `${item.train.train} · ${item.departAt.replace('T', ' ')} → ${item.arriveAt.replace('T', ' ')} · ${item.train.duration} · 理想 ${item.idealDepart} · 适配 ${item.score} 分 · 同站组合另有 ${item.alternatives} 趟可购 · ${item.fare === null ? '票价待核对' : `¥${item.fare.toFixed(2)}`}`;
+          const link = document.createElement('a'); link.href = item.url; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = '12306 核对 ↗';
+          leg.append(dayLabel, stations, detail, link); route.appendChild(leg);
+        }
+        $('planner-title').textContent = [origin, ...plan.legs.map(item => item.to)].join(' → ');
+        $('planner-subtitle').textContent = `${plan.legs.length} 段 · ${plan.totalFare === null ? '部分票价待核对' : `车票合计 ¥${plan.totalFare.toFixed(2)}`} · 核查 ${plan.checkedPairs} 组城市/日期 · 查询于 ${new Date(plan.queriedAt).toLocaleTimeString('zh-CN')}`;
+        $('planner-output').hidden = false;
+      }
+      $('planner-form').addEventListener('submit', planTrip);
+      const tomorrow = new Date(); $('plan-date').min = isoDay(tomorrow); tomorrow.setDate(tomorrow.getDate() + 1); $('plan-date').value = isoDay(tomorrow);
+    })();
+  </script>
+  <script>
+    (() => {
+      const byId = id => document.getElementById(id);
+      const start = byId('path-start');
+      const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(9, 0, 0, 0);
+      const localValue = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}T${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+      start.value = localValue(tomorrow);
+      start.min = localValue(new Date());
+      let idealTouched = false;
+      byId('path-ideal').addEventListener('input', () => { idealTouched = true; });
+      start.addEventListener('change', () => {
+        if (!idealTouched && start.value) byId('path-ideal').value = start.value.slice(11, 16);
+      });
+      const fmt = x => x.replace('T', ' ');
+      let pathChoices = [];
+      const stationLabel = (station, city) => station.includes(city) ? station : `${station}（${city}）`;
+      function renderPath(data) {
+        byId('path-summary').textContent = `${data.cities.join(' → ')} · ${data.score} 分 · ${Math.floor(data.durationMinutes/60)}小时${data.durationMinutes%60}分 · ${data.transfers}次换乘 · ${fmt(data.arriveAt)}到达`;
+        const parts = data.scoreParts;
+        byId('path-score-note').textContent = `发车 ${parts.departure} + 历时 ${parts.duration} - 换乘 ${parts.transferPenalty}；${parts.excessTransfers ? `超出建议换乘次数 ${parts.excessTransfers} 次` : `在建议换乘次数内`}。`;
+        const list = byId('path-legs'); list.replaceChildren();
+        for (const leg of data.legs) {
+          const row = document.createElement('div'); row.className = 'path-leg';
+          const train = document.createElement('strong'); train.textContent = leg.train;
+          const via = (leg.via || []).filter(stop => stop.station !== leg.to)
+            .map(stop => `经 ${stationLabel(stop.station, stop.city)}（同车）`).join(' · ');
+          const route = document.createElement('span'); route.textContent = `${stationLabel(leg.from, leg.fromCity)} → ${stationLabel(leg.to, leg.toCity)}${via ? ` · ${via}` : ''}${leg.connection ? ` · ${leg.connection}` : ''}`;
+          const time = document.createElement('span'); time.textContent = `${fmt(leg.departAt)} → ${fmt(leg.arriveAt)}`;
+          row.append(train, route, time); list.append(row);
+        }
+      }
+      byId('path-options').addEventListener('change', event => renderPath(pathChoices[Number(event.target.value)]));
+      byId('path-form').addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = byId('path-button');
+        const message = byId('path-message');
+        button.disabled = true; message.textContent = '正在比较候选路线…';
+        byId('path-result').hidden = true;
+        try {
+          const stations = byId('path-stations').value.split(/[，,;；\n]+/).map(x => x.trim()).filter(Boolean);
+          const response = await fetch('/api/path', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({stations, start:start.value, preferredTime:byId('path-ideal').value, mode:byId('path-mode').value})});
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || '搜索失败');
+          const version = data.data?.version?.slice(0, 8) || '未知';
+          byId('path-version').textContent = `当前版本：${version}；${data.data?.checkedOn ? `最近检查：${data.data.checkedOn}。` : '尚未成功检查更新。'}`;
+          pathChoices = [data, ...data.alternatives];
+          const options = byId('path-options'); options.replaceChildren();
+          pathChoices.forEach((choice, index) => {
+            const option = document.createElement('option'); option.value = String(index);
+            option.textContent = `${index === 0 ? '推荐' : `方案 ${index + 1}`} · ${choice.score} 分 · ${choice.transfers} 次换乘 · ${fmt(choice.departAt)} 出发`;
+            options.append(option);
+          });
+          renderPath(data);
+          byId('path-result').hidden = false;
+          message.textContent = [data.stationScope === 'all' ? '主站范围内未找到路线，已扩大到全市车站；请核对具体站点位置。' : '', data.data?.warning || ''].filter(Boolean).join(' ');
+        } catch (error) { message.textContent = error.message; }
+        finally { button.disabled = false; }
+      });
+    })();
+  </script>
+</body>
+</html>

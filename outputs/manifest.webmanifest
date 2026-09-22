@@ -1,0 +1,11 @@
+{
+  "name": "12306 余票查询",
+  "short_name": "12306助手",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f6f4",
+  "theme_color": "#087f69",
+  "icons": [
+    { "src": "/app-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
